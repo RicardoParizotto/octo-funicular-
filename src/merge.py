@@ -10,7 +10,6 @@ from pprint import pprint
 #(2) headers
 #(3) parsers
 
-
 '''
  Merger must be capable of produce a new JSON file to the composition
 '''
@@ -22,19 +21,23 @@ class Merger:
         newP4Program = {}
 
 
-    def add_newState():
+    def add_newState(state_ID, stateTransition):
     #adds the new state to the newP4Program specification
 
     def merge_States(): 
     #just merge if headers definition are equivalent
     #ifnot, notify the operator to help on this
 
-    def add_newTransition(sourceState, newTransition):
-    #add a new transition to the sourceState of the newP4Program
+    def add_newTransition(state_ID, newTransition):
+        newP4Program['parsers'][0]['parse_states'][state_ID]['transitions'].append(stateTransition)
+        #add a new transition to the sourceState of the newP4Program
+        #this probably don't work
 
     def verify_Loops():
     #verify if the composition have loops
 
+    def add_headerInstance():
+    #add new header instance to the newP4Program
 
 
     def parser_Composition(mainP4Program, modularp4Program):
@@ -42,8 +45,20 @@ class Merger:
         for mainParserState in mainP4Program['parsers'][0]['parse_states']:
             for modularParserState in modularP4Program['parsers'][0]['parser_states']:
                 if (mainParserState == modularParserState):
+                    for stateTransition in modularParserState['transitions']:
+                        if stateTransition not in mainParserState['transitions']:
+                            add_transition(mainParserState, stateTransition)
 
+                    #add_newTransitions()
+                    #mark state as visited 
+        #add states that were not visited (that are new states)
+        #adding new states may need to add new header instances also.
+        #add header instance
 
+    #just save the merged code to the main diretory     
+    def save_newP4Program():
+        file = open('newP4Program.json', 'w')
+        file.write(json.dumps(newP4Program)) 
 
     def parser_Composition(mainP4Program, modularP4Program):
 
@@ -80,10 +95,7 @@ class Merger:
         newProgram['transition'] = transition
         newProgram['parser_states'] = parser_states
                         
-        file = open('newProgram.json', 'w')
-        file.write(json.dumps(newProgram)) 
         #parser = basis_code['parsers'][0]['parse_states'][0]['transition_key']
-
 
         #to all transition keys:
 
@@ -95,7 +107,6 @@ class Merger:
         #parser_states_must have the same name. Similiarlly to what happens on ltsa tools.
 
         #pprint(data)
-
 
 def __init__(self):
 
