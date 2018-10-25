@@ -1,0 +1,1 @@
+{"transition": [], "parser_states": [[{"parameters": [{"type": "regular", "value": "ethernet"}], "op": "extract"}]], "transition_key": [{"type": "field", "value": ["ipv4", "protocol"]}]}
