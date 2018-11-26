@@ -1,6 +1,7 @@
 
-
 #!/usr/bin/python
+
+import sys
 
 import json
 from pprint import pprint
@@ -32,6 +33,7 @@ class Merger:
 
     def add_newTransition(self, state_ID, newTransition):
         self.newP4Program['parsers'][0]['parse_states'][state_ID]['transitions'].append(stateTransition)
+        print(batata2)
         #add a new transition to the sourceState of the newP4Program
         #this probably don't work
 
@@ -43,24 +45,30 @@ class Merger:
         print ('add new header instance to the newP4Program')
     #add new header instance to the newP4Program
 
+    def modularity_Analysis():
+    #do nothing
+        print ('do nothing')
 
-    def parser_Composition(self, mainP4Program, modularp4Program):
 
-        visitedStates = {}
+    def parser_Composition(self, mainP4Program, modularP4Program):
+
+        visitedStates = []      #thats for the search algorithm
 
         for mainParserState in mainP4Program['parsers'][0]['parse_states']:
-            for modularParserState in modularP4Program['parsers'][0]['parser_states']:
-                if (mainParserState == modularParserState):
+            for modularParserState in modularP4Program['parsers'][0]['parse_states']:
+                if(mainParserState['name'] == modularParserState['name']):  
+                    print("batata")         
+                #if (mainParserState == modularParserState):
                     #mark modularParserState as visited
-                    visitedStates.add(modularParserState)
+                    visitedStates.append(modularParserState)
                     for stateTransition in modularParserState['transitions']:
                         if stateTransition not in mainParserState['transitions']:
                             #add transitions to the state mainParserState
                             add_transition(mainParserState, stateTransition)
 
-        for modularParserState in modularP4Program['parsers'][0]['parser_states']: 
+        for modularParserState in modularP4Program['parsers'][0]['parse_states']: 
             if(modularParserState not in visitedStates):
-                add_newState(modularParserStates)
+                self.add_newState(modularParserState)
 
 
         ##need disambiguation here :(            
@@ -68,32 +76,39 @@ class Merger:
             if(headerInstances not in mainP4Program['headers']):
                 add_headerInstance(headerInstance)       
 
+        print('passa aqui')           
 
         #add states that were not visited (that are new states)
         #adding new states may need to add new header instances also.
         #add header instance
 
-
-
     #just save the merged code to the main diretory     
     def save_newP4Program(self):
         file = open('newP4Program.json', 'w')
-        file.write(json.dumps(newP4Program)) 
+        print('teste')
+        file.write(json.dumps(self.newP4Program)) 
 
 
-def __init__(self):
+if __name__ == "__main__":
 
-
-    """
+    """ss
     TODO
     passe file names as a param for __init__
     """
 
-    #this should open the basis code
-    with open('advanced_tunnel.json') as f:
+    print('teste')
+    #this should open the basis code json
+    with open(sys.argv[1]) as f:
         baseCode = json.load(f)
 
-    #this must be the modular one
-    with open('modularp4.json') as k:
-       smallModule = json.load(k)
+    #this must be the modular one json -- extensionn
+    with open(sys.argv[2]) as k:
+       extension = json.load(k)
+
+    print('teste')
  
+    shadowGuard = Merger()
+
+    shadowGuard.parser_Composition(baseCode, extension)
+
+    shadowGuard.save_newP4Program()
