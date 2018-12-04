@@ -1,7 +1,6 @@
 
 #!/usr/bin/python
 
-import sys
 
 import json
 from pprint import pprint
@@ -16,8 +15,22 @@ from pprint import pprint
  Merger must be capable of produce a new JSON file to the composition
 '''
 
-class Merger:
+class Modularity_Analysis:
+    def __init__(self):
+        print('do the fucking analysis bro')
 
+    #verify if the parser composition have loops or nom-determinism
+    def verify_Loops(self):
+        print('verify if the composition have loops')
+  
+    def modularity_Analysis():
+        #verify_Loops()
+        print ('do nothing')
+
+
+
+
+class Merger:
     def __init__(self, baseProgram):
         parsers = []
         self.newP4Program = baseProgram    #this is the new created program
@@ -26,27 +39,12 @@ class Merger:
     def add_newState(self, newState):
         self.newP4Program['parsers'][0]['parse_states'].append(newState)
 
-    def merge_States(self): 
-        print ('just merge if headers definition are equivalent')
-    #just merge if headers definition are equivalent
-    #ifnot, notify the operator to help on this
-
     #add a new transition to the sourceState of the newP4Program
     def add_newTransition(self, parser_state, newTransition):
         parser_state['transitions'].append(newTransition)
         #this probably don't work
         #actually it works pretty fine if transitions are made using the same attribute
     
-    #verify if the parser composition have loops or nom-determinism
-    def verify_Loops(self):
-        print('verify if the composition have loops')
-
-    
-    def modularity_Analysis():
-        #do nothing
-        #verify_Loops()
-        print ('do nothing')
-
     #composition of header definitions
     def header_types_composition(self, modularP4Program):
         header_names = []
@@ -71,10 +69,8 @@ class Merger:
                 self.newP4Program['headers'].append(header_instance)
     
 
-
     def parser_composition(self, modularP4Program):
         visitedStates = []      #thats for the search algorithm
-
 
         for mainParserState in self.newP4Program['parsers'][0]['parse_states']:
             for modularParserState in modularP4Program['parsers'][0]['parse_states']:
@@ -106,11 +102,23 @@ class Merger:
         #adding new states may need to add new header instances also.
         #add header instance
 
+    def pipeline(self, extension):
+
+
+        #new tables must be inserted here
+        self.newP4Program['pipelines'][0]['tables'][0]['id']
+
+        #TODO change this.
+        #the shadow table must be the first to process packets
+        self.newP4Program['pipelines'][0]['init_table']
+
+
+
+
     def composition(self, extension):
         #TODO  
         ##need disambiguation here :(   
         ##we may insert constructs with repeated id's. This lead to deployment errors. 
-
         self.parser_composition(extension)
         self.header_types_composition(extension)
         self.header_instances_composition(extension)
@@ -124,24 +132,4 @@ class Merger:
         file.write(json.dumps(self.newP4Program,  indent=4)) 
 
 
-if __name__ == "__main__":
-
-    """ss
-    TODO
-    passe file names as a param for __init__
-    """
-    #this should open the basis code json
-    with open(sys.argv[1]) as f:
-        baseCode = json.load(f)
-
-    #this must be the modular one json -- extensionn
-    with open(sys.argv[2]) as k:
-       extension = json.load(k)
-
- 
-    shadowGuard = Merger(baseCode)
-    shadowGuard.composition(extension)
-
-
-    #sw1.addProgram(firewall.p4)
 
