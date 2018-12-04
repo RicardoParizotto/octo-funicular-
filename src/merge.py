@@ -11,82 +11,117 @@ from pprint import pprint
 #(2) headers
 #(3) parsers
 #(4) (deparsers)
-
+#(5) entire control flow
 '''
  Merger must be capable of produce a new JSON file to the composition
 '''
 
 class Merger:
 
-    def __init__(self):
+    def __init__(self, baseProgram):
         parsers = []
-        self.newP4Program = {}    #this is the new created program
+        self.newP4Program = baseProgram    #this is the new created program
 
-    def add_newState(self, newState):
-        print ('adds the new state to the newP4Program specification')
     #adds the new state to the newP4Program specification
+    def add_newState(self, newState):
+        self.newP4Program['parsers'][0]['parse_states'].append(newState)
 
     def merge_States(self): 
         print ('just merge if headers definition are equivalent')
     #just merge if headers definition are equivalent
     #ifnot, notify the operator to help on this
 
-    def add_newTransition(self, state_ID, newTransition):
-        self.newP4Program['parsers'][0]['parse_states'][state_ID]['transitions'].append(stateTransition)
-        print(batata2)
-        #add a new transition to the sourceState of the newP4Program
+    #add a new transition to the sourceState of the newP4Program
+    def add_newTransition(self, parser_state, newTransition):
+        parser_state['transitions'].append(newTransition)
         #this probably don't work
-
+        #actually it works pretty fine if transitions are made using the same attribute
+    
+    #verify if the parser composition have loops or nom-determinism
     def verify_Loops(self):
         print('verify if the composition have loops')
-    #verify if the composition have loops
 
-    def add_headerInstance(self, headerInstance):
-        print ('add new header instance to the newP4Program')
-    #add new header instance to the newP4Program
-
+    
     def modularity_Analysis():
-    #do nothing
+        #do nothing
+        #verify_Loops()
         print ('do nothing')
 
+    #composition of header definitions
+    def header_types_composition(self, modularP4Program):
+        header_names = []
 
-    def parser_Composition(self, mainP4Program, modularP4Program):
+        for header in self.newP4Program['header_types']:
+            header_names.append(header['name'])
 
+        for header_instance in modularP4Program['header_types']:
+            if(header_instance['name'] not in header_names):
+                self.newP4Program['header_types'].append(header_instance)
+   
+    #add new header instance to the newP4Program
+    def header_instances_composition(self, modularP4Program):
+        header_names = []
+
+        for header in self.newP4Program['headers']:
+            header_names.append(header['name'])
+
+        for header_instance in modularP4Program['headers']:
+            if(header_instance['name'] not in header_names):
+                print('adding header instance:' + header_instance['name'])
+                self.newP4Program['headers'].append(header_instance)
+    
+
+
+    def parser_composition(self, modularP4Program):
         visitedStates = []      #thats for the search algorithm
 
-        for mainParserState in mainP4Program['parsers'][0]['parse_states']:
+
+        for mainParserState in self.newP4Program['parsers'][0]['parse_states']:
             for modularParserState in modularP4Program['parsers'][0]['parse_states']:
+                #for now we just compare names of the parser state
                 if(mainParserState['name'] == modularParserState['name']):  
-                    print("batata")         
-                #if (mainParserState == modularParserState):
                     #mark modularParserState as visited
-                    visitedStates.append(modularParserState)
+                    visitedStates.append(modularParserState['name'])
+
+                    transition_name = []
+                    for main_transitions in mainParserState['transitions']:                       
+                        transition_name.append(main_transitions['next_state'])        
+
                     for stateTransition in modularParserState['transitions']:
-                        if stateTransition not in mainParserState['transitions']:
+                        if stateTransition['next_state'] not in transition_name:
                             #add transitions to the state mainParserState
-                            add_transition(mainParserState, stateTransition)
+                            print('adding transition:' + stateTransition['next_state'])
 
+                            #this is the case where the host state has no transitions
+                            if not mainParserState['transition_key']:
+                                mainParserState['transition_key'] = modularParserState['transition_key']
+
+                            self.add_newTransition(mainParserState, stateTransition)
+
+        #this adds states that were not visited by our search algorithm                    
         for modularParserState in modularP4Program['parsers'][0]['parse_states']: 
-            if(modularParserState not in visitedStates):
-                self.add_newState(modularParserState)
-
-
-        ##need disambiguation here :(            
-        for headerInstances in modularP4Program['headers']:
-            if(headerInstances not in mainP4Program['headers']):
-                add_headerInstance(headerInstance)       
-
-        print('passa aqui')           
-
+            if(modularParserState['name'] not in visitedStates):
+                self.add_newState(modularParserState)    
         #add states that were not visited (that are new states)
         #adding new states may need to add new header instances also.
         #add header instance
 
+    def composition(self, extension):
+        #TODO  
+        ##need disambiguation here :(   
+        ##we may insert constructs with repeated id's. This lead to deployment errors. 
+
+        self.parser_composition(extension)
+        self.header_types_composition(extension)
+        self.header_instances_composition(extension)
+
+        self.save_newP4Program()
+
     #just save the merged code to the main diretory     
     def save_newP4Program(self):
         file = open('newP4Program.json', 'w')
-        print('teste')
-        file.write(json.dumps(self.newP4Program)) 
+        print('Saving the new file')
+        file.write(json.dumps(self.newP4Program,  indent=4)) 
 
 
 if __name__ == "__main__":
@@ -95,8 +130,6 @@ if __name__ == "__main__":
     TODO
     passe file names as a param for __init__
     """
-
-    print('teste')
     #this should open the basis code json
     with open(sys.argv[1]) as f:
         baseCode = json.load(f)
@@ -105,10 +138,10 @@ if __name__ == "__main__":
     with open(sys.argv[2]) as k:
        extension = json.load(k)
 
-    print('teste')
  
-    shadowGuard = Merger()
+    shadowGuard = Merger(baseCode)
+    shadowGuard.composition(extension)
 
-    shadowGuard.parser_Composition(baseCode, extension)
 
-    shadowGuard.save_newP4Program()
+    #sw1.addProgram(firewall.p4)
+
