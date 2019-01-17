@@ -1,0 +1,14 @@
+apply ::  
+
+a -> p 
+p -> pl
+pl -> l
+l -> y
+y -> ' '  |  { 
+' ' -> ' ' | {
+{ -> [bloco]}
+
+
+table : == table <name> { * }
+apply : == apply { * }
+action : == action <name> { * }
