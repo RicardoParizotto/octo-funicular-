@@ -20,7 +20,7 @@ class parser_composition:
     def parse_codeBlock(self):
         colchetes = 0
         local_buffer = []
-        print(self.src_code)
+
         while self.it_lines < self.code_len:
             if(self.src_code[self.it_lines] == '{'):
                 colchetes = colchetes + 1
@@ -41,11 +41,10 @@ class parser_composition:
         while self.it_lines < self.code_len:
             if(self.src_code[self.it_lines] != '{'):
                 _name = _name + self.src_code[self.it_lines]
-                print(self.src_code[self.it_lines])
             else:
                 break
             self.it_lines = self.it_lines + 1
-        print(_name)
+
         return _name.strip()
 
     #scan constructs that have identificator such as 
@@ -82,19 +81,17 @@ class parser_composition:
                     self.it_symbols = 0;
             self.it_lines = self.it_lines + 1
 
-
-
-
     def scan_control_block(self):
         while self.it_lines < self.code_len:
             if(self.src_code[self.it_lines] == 't'):
                 #try to read table
-                self.tables_.append(self.scan_named_def("table*"))
-                print(table)
+                x = self.scan_named_def("table*")
+                self.tables_.append(x)
             elif(self.src_code[self.it_lines] == 'a'):
                 if(self.src_code[self.it_lines+1] == 'c'):
-                    self.actions_.append(self.scan_named_def("action*"))
+                    y = self.scan_named_def("action*")
+                    self.actions_.append(y)
                 else:
-                    print(self.scan_apply())
+                    self.scan_apply()
             self.it_lines = self.it_lines + 1
 

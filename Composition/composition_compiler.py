@@ -4,17 +4,20 @@ from p4module import load_p4module
 
 class process_commandline:
 
+    modules_ = []
+    operators = []
+
     def read_file(self, file):
         f = open(file, 'r')
-        g = f.read()
+        return f.read()
 
-        parser = parser_composition(g)
+    def parser_command_line(self, Host):
 
-        #print(parser.scan_apply())
 
-        parser.scan_control_block()
 
-    def parser_command_line(Extension, Host):
+        l = load_p4module(self.read_file(Host))
+
+        l.parallel_composition()
 
         '''
         TODO 
@@ -26,11 +29,7 @@ class process_commandline:
         push modules and operators into queue
 
         process the composition
-
         '''
-        return 'error'
-
-
 
 if __name__ == "__main__":
     """ss
@@ -47,4 +46,4 @@ if __name__ == "__main__":
 
     #compose
     p = process_commandline()
-    p.read_file(sys.argv[1])
+    p.parser_command_line(sys.argv[1])
