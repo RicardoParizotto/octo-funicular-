@@ -8,18 +8,20 @@ class load_p4module:
         self.parser = parser_composition(host)
 
 
+    #this actually builds the new program    
     def parallel_composition(self):
         #print("ERRO")
 
         self.parser.scan_control_block()
 
         print ("actions" + str(self.parser.actions_))
-        print(self.parser.tables_)
-        print (self.parser.apply_block)
+        print("tables" + str(self.parser.tables_))
+        print ("apply content" + str(self.parser.apply_block))
 
-
-        '''
-        with open('your_file.txt', 'w') as f:
-            for item in self.apply_block:
-                f.write("%s" % item)
-        '''
+        with open('composition.txt', 'w') as f:
+            for item in self.parser.tables_:
+                for table in item:
+                    f.write("%s" % "table " + table)
+                    for j in item[table]:
+                        f.write("%s" % j)
+        

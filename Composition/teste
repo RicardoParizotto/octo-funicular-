@@ -1,12 +1,51 @@
 
-    action drop() {
-        mark_to_drop();
-    }
-
     action simple_forward(egressSpec_t port){
         standard_metadata.egress_spec = port;
     }
 
+    action set_chaining(egressSpec_t prog){
+         meta.context_control = 1;      
+         meta.extension_id1 = prog;
+    }
+
+    table set_heavy_hitter_count_table {
+        actions = {
+            set_heavy_hitter_count;
+        }
+        default_action = set_heavy_hitter_count;
+        size = 1;
+    }
+
+  
+     table copy_to_cpu {
+          actions = {
+              do_copy_to_cpu;
+          }
+          default_action = do_copy_to_cpu;
+          size = 1;
+     }
+    
+    table monitor{
+
+      actions = {
+        watch_ts;
+      }
+      default_action = watch_ts;
+      size = 1;
+    }
+
+
+    table shadow{
+       key = {
+          hdr.ethernet.dstAddr: lpm;
+       }
+       actions = {
+           set_chaining;
+           NoAction;  
+       }
+       size = 1024;
+       default_action = NoAction();
+    }
 
     table eth_exact{
         key = {
@@ -22,5 +61,31 @@
     }
 
     apply {
-	   eth_exact.apply();
+        shadow.apply();
+
+        if(meta.context_control == 1){
+          //the second function of the chain. It is not yet modular :( 
+          if(meta.extension_id1 == 1){
+            //flowguard_ingress(); this line should call the modular function
+            //For now im calling it here
+
+            if(hdr.ipv4.isValid()){
+
+                set_heavy_hitter_count_table.apply();
+
+                smalltresh.read(meta.custom_metadata.smalltresh,0);
+
+                tresh.read(meta.custom_metadata.tresh,0);
+
+                if( meta.custom_metadata.count_val1 > meta.custom_metadata.smalltresh ){
+                    monitor.apply();
+                }
+                if( meta.custom_metadata.count_val1 > meta.custom_metadata.tresh ){
+                  copy_to_cpu.apply();
+                }
+            }
+          }
+        }
+       eth_exact.apply();
     }
+}

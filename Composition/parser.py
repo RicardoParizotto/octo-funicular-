@@ -15,8 +15,23 @@ class parser_composition:
         self.apply_block = []
         self.tables = []
 
+
+    #load param definitions to a different structure
+    #this is necessary just for parsing and rewriting
+    def parse_params(self):
+        params_ = ""
+
+        while self.src_code[self.it_lines] != ')':
+            self.it_lines = self.it_lines + 1
+            params_ = params_ + self.src_code[self.it_lines]
+
+        self.it_lines = self.it_lines + 1
+
+        return params_
+
+
     #just load a block between '{' and '}'
-    #all recursive calls inside the block are loaded with it
+    #all recursive calls inside the block are loaded with 
     def parse_codeBlock(self):
         colchetes = 0
         local_buffer = []
@@ -39,7 +54,7 @@ class parser_composition:
     def parse_name(self):
         _name = ""
         while self.it_lines < self.code_len:
-            if(self.src_code[self.it_lines] != '{'):
+            if(self.src_code[self.it_lines] != '{' and self.src_code[self.it_lines] != '('):
                 _name = _name + self.src_code[self.it_lines]
             else:
                 break
@@ -49,49 +64,40 @@ class parser_composition:
 
     #scan constructs that have identificator such as 
     #controls, actions and tables definitions
-    def scan_named_def(self, dic_):
+    def scan_def(self, dic_):
         it_symbols = 0
 
         while self.it_lines < self.code_len:
             if dic_[it_symbols] == '*':
-                name = self.parse_name()
-                block = self.parse_codeBlock()
-                return { name : block }
+                return True
             else:
                 if(dic_[it_symbols] == self.src_code[self.it_lines]):
                     it_symbols = it_symbols + 1
                 else:
-                    return -1
+                    return False
             self.it_lines = self.it_lines + 1
 
-
-    def scan_apply(self):
-        apply_ = ['a', 'p', 'p', 'l', 'y', "*"]
-
-        while self.it_lines < self.code_len: 
-            #scan main block
-            if (apply_[self.it_symbols] == '*'):
-                self.apply_block = self.parse_codeBlock()
-                return self.apply_block
-            else:
-                #keep parsing
-                if(apply_[self.it_symbols] == self.src_code[self.it_lines]):
-                    self.it_symbols = self.it_symbols + 1
-                else:
-                    self.it_symbols = 0;
-            self.it_lines = self.it_lines + 1
 
     def scan_control_block(self):
         while self.it_lines < self.code_len:
             if(self.src_code[self.it_lines] == 't'):
                 #try to read table
-                x = self.scan_named_def("table*")
-                self.tables_.append(x)
+                if(self.scan_def("table*")):
+                    name = self.parse_name()
+                    block = self.parse_codeBlock()
+                    self.tables_.append({name : block})
+
             elif(self.src_code[self.it_lines] == 'a'):
+
                 if(self.src_code[self.it_lines+1] == 'c'):
-                    y = self.scan_named_def("action*")
-                    self.actions_.append(y)
+                    if(self.scan_def("action*")):
+                        name = self.parse_name()
+                        params = self.parse_params()
+                        block = self.parse_codeBlock()
+                        self.actions_.append({name : block})
                 else:
-                    self.scan_apply()
+                    if(self.scan_def("apply*")):
+                        self.apply_block = self.parse_codeBlock()
+
             self.it_lines = self.it_lines + 1
 
