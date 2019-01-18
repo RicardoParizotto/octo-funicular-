@@ -1,5 +1,5 @@
 import sys
-from parser import parser_composition
+from p4module import load_p4module
 
 
 class process_commandline:
@@ -10,24 +10,29 @@ class process_commandline:
 
         parser = parser_composition(g)
 
-        print(parser.scan_apply())
+        #print(parser.scan_apply())
 
         parser.scan_control_block()
 
-    def composition(Extension, Host):
+    def parser_command_line(Extension, Host):
+
         '''
         TODO 
+        
+        interpret commands
 
+        read P4 files
+
+        push modules and operators into queue
+
+        process the composition
 
         '''
         return 'error'
 
-    def parallel_operator(Extension, Host)
-        return 'error'
 
 
 if __name__ == "__main__":
-
     """ss
     TODO
     passe file names as a param for __init__

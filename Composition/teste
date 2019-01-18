@@ -1,3 +1,20 @@
+
+    action drop() {
+        mark_to_drop();
+    }
+
+    action simple_forward(egressSpec_t port){
+        standard_metadata.egress_spec = port;
+    }
+
+
+    table eth_exact{
+        key = {
+            hdr.ethernet.srcAddr:exact;
+        }
+        actions={
+             simple_forward();
+             NoAction;
              drop;
         }
         size = 1024;
@@ -5,43 +22,5 @@
     }
 
     apply {
-        shadow.apply();
-
-        if(meta.context_control == 1){
-
-          //Not yet modular :( 
-          if(meta.extension_id1 == 1){
-            //flowguard_ingress(); this line should call the modular function
-            //For now im calling it here
-
-            if(hdr.ipv4.isValid()){
-              set_heavy_hitter_count_table.apply();
-
-              smalltresh.read(meta.custom_metadata.smalltresh,0);
-
-              tresh.read(meta.custom_metadata.tresh,0);
-
-              if( meta.custom_metadata.count_val1 > meta.custom_metadata.smalltresh ){
-                  monitor.apply();
-              }
-              if( meta.custom_metadata.count_val1 > meta.custom_metadata.tresh ){
-                copy_to_cpu.apply();
-              }
-            }
-          }
-          //firewall
-          if(meta.extension_id2 == 1){
-             if(hdr.tcp.isValid()){
-                if(hdr.tcp.ACK == 1 && hdr.tcp.SIN == 1){
-                   default_path.apply();
-                } 
-             }
-          }
-       }
-       eth_exact.apply();
+	   eth_exact.apply();
     }
-}
-
-/*************************************************************************
-****************  E G R E S S   P R O C E S S I N G   *******************
-*************************************************************************/
