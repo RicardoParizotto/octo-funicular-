@@ -11,13 +11,12 @@ class process_commandline:
         f = open(file, 'r')
         return f.read()
 
-    def parser_command_line(self, Host):
-
-
-
+    def parser_command_line(self, Host, Extension):
         l = load_p4module(self.read_file(Host))
 
-        l.parallel_composition()
+        x = load_p4module(self.read_file(Extension))
+
+        l.sequential_composition(x.load)
 
         '''
         TODO 
@@ -46,4 +45,5 @@ if __name__ == "__main__":
 
     #compose
     p = process_commandline()
-    p.parser_command_line(sys.argv[1])
+    p.parser_command_line(sys.argv[1], sys.argv[2])
+

@@ -40,6 +40,8 @@ class parser_composition:
             if(self.src_code[self.it_lines] == '{'):
                 colchetes = colchetes + 1
             elif(self.src_code[self.it_lines] == '}'):
+               local_buffer.append(self.src_code[self.it_lines])
+               self.it_lines = self.it_lines + 1
                if(colchetes == 1):
                    return local_buffer
                else:

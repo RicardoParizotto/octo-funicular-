@@ -1,0 +1,92 @@
+
+    action drop() {
+        mark_to_drop();
+    }
+    
+     /*hashs the packet-in using crc16. Put the result of the (hash % ecmp_count) + ecmp_base on meta.ecmp_select*/
+    action set_ecmp_select(bit<16> ecmp_base, bit<32> ecmp_count) {
+        hash(meta.ecmp_select,
+	    HashAlgorithm.crc16,
+	    ecmp_base,
+	    { hdr.ipv4.srcAddr,
+	      hdr.ipv4.dstAddr,
+              hdr.ipv4.protocol,
+              hdr.tcp.srcPort,
+              hdr.tcp.dstPort },
+	    ecmp_count);
+
+	    meta.AVOID_LOOP = 1;
+    }
+
+   /*set the output_port to 'port'	*/
+   action simple_forward (egressSpec_t port){
+         standard_metadata.egress_spec = port;
+    }
+
+    /*set the output_port to 'port' and decrement ttl of the ipv4 header*/
+    action set_nhop( egressSpec_t port) {
+        standard_metadata.egress_spec = port;
+        hdr.ipv4.ttl = hdr.ipv4.ttl - 1;
+    }
+
+    /*set set output_port to 'port' and decrement ttl of the ipv4 header. update the ethernet header source and destination*/	
+    action ipv4_forward(macAddr_t dstAddr, egressSpec_t port) {
+        standard_metadata.egress_spec = port;
+        hdr.ethernet.srcAddr = hdr.ethernet.dstAddr;
+        hdr.ethernet.dstAddr = dstAddr;
+        hdr.ipv4.ttl = hdr.ipv4.ttl - 1;
+    }
+
+    table arp_send{
+        key = {
+           hdr.arp.dst_ip: lpm;
+        }
+        actions = {
+           simple_forward;
+	   NoAction;
+        }
+        size = 1024;
+        default_action= NoAction();
+     }
+
+    table ipv4_lpm {
+        key = {
+            hdr.ipv4.dstAddr: lpm;
+        }
+        actions = {
+            ipv4_forward;
+            simple_forward;
+            set_ecmp_select;
+            drop;
+            NoAction;
+        }
+        size = 1024;
+        default_action = NoAction();
+    }
+
+    table ecmp_nhop {
+        key = {
+            meta.ecmp_select: exact;
+        }
+        actions = {
+            drop;
+            NoAction;
+            set_nhop;
+        }
+        size = 4;
+       default_action=NoAction();
+    }
+
+    apply {
+        if(hdr.arp.isValid()){
+            arp_send.apply();
+        }else{
+	        if (hdr.ipv4.isValid()) {
+	            ipv4_lpm.apply();
+	
+	            if(meta.AVOID_LOOP == 1){
+	           	     ecmp_nhop.apply();
+         	     }	
+		}
+         }
+    }
