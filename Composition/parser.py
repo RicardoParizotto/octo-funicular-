@@ -8,11 +8,9 @@ class parser_composition:
     def __init__(self, src_p4):
         self.it_lines = 0
         self.it_symbols = 0
-        self.colchetes = 0
         self.src_code = src_p4
         self.code_len = len(self.src_code)
         self.buffer_ = []
-        self.apply_block = []
         self.tables = []
 
 
@@ -49,6 +47,7 @@ class parser_composition:
 
             local_buffer.append(self.src_code[self.it_lines])
             self.it_lines = self.it_lines + 1
+
         return -1     
 
     #just scan the name (id) of a control flow construct
@@ -81,25 +80,42 @@ class parser_composition:
 
 
     def scan_control_block(self):
+        colchetes = 0
+
         while self.it_lines < self.code_len:
-            if(self.src_code[self.it_lines] == 't'):
-                #try to read table
-                if(self.scan_def("table*")):
-                    name = self.parse_name()
-                    block = self.parse_codeBlock()
-                    self.tables_.append({name : block})
+            if(self.src_code[self.it_lines] == '{'):
+                colchetes = colchetes + 1
+            elif(self.src_code[self.it_lines] == '}'):
+               self.it_lines = self.it_lines + 1
+               if(colchetes == 1):
+                   return
+               else:
+                   colchetes = colchetes - 1
+            elif(self.src_code[self.it_lines] == 't'):
+                    #try to read table
+                    if(self.scan_def("table*")):
+                        name = self.parse_name()
+                        block = self.parse_codeBlock()
+                        self.tables_.append({name : block})
 
             elif(self.src_code[self.it_lines] == 'a'):
-
                 if(self.src_code[self.it_lines+1] == 'c'):
                     if(self.scan_def("action*")):
-                        name = self.parse_name()
-                        params = self.parse_params()
-                        block = self.parse_codeBlock()
-                        self.actions_.append({name : block})
-                else:
-                    if(self.scan_def("apply*")):
-                        self.apply_block = self.parse_codeBlock()
+                            name = self.parse_name()
+                            params = self.parse_params()
+                            block = self.parse_codeBlock()
+                            self.actions_.append({name : block})
+                    elif(self.scan_def("apply*")):
+                        self.apply_.append(self.parse_codeBlock())
 
             self.it_lines = self.it_lines + 1
 
+
+    def scan_control(self):
+        while self.it_lines < self.code_len:
+            if(self.src_code[self.it_lines] == 'c'):
+                if(self.scan_def("control*")):
+                    name = self.parse_name()
+                    params = self.parse_params()
+                    block = self.scan_control_block()
+            self.it_lines = self.it_lines + 1
