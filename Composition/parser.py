@@ -1,9 +1,9 @@
 class parser_composition:
 
-    tables_= []
-    actions_ = []
+    tables_= []        #list of tables. I think that a dict would be efficiently
+    actions_ = []      #list of actions. Same for dict...
 
-    apply_ = {}
+    apply_ = {}        #a dic of every apply found on each control. The control id is the dic index
 
     #init structures to help the scanning process
     def __init__(self, src_p4):
@@ -23,14 +23,12 @@ class parser_composition:
         while self.src_code[self.it_lines] != ')':
             self.it_lines = self.it_lines + 1
             params_ = params_ + self.src_code[self.it_lines]
-
         self.it_lines = self.it_lines + 1
 
         return params_
 
-
     #just load a block between '{' and '}'
-    #all recursive calls inside the block are loaded with 
+    #all recursive calls inside the block are loaded with
     def parse_codeBlock(self):
         colchetes = 0
         local_buffer = []
@@ -45,14 +43,12 @@ class parser_composition:
                    return local_buffer
                else:
                    colchetes = colchetes - 1
-
             local_buffer.append(self.src_code[self.it_lines])
             self.it_lines = self.it_lines + 1
-
-        return -1     
+        return -1
 
     #just scan the name (id) of a control flow construct
-    #its a naive implementation, since 
+    #its a naive implementation, since
     def parse_name(self):
         _name = ""
         while self.it_lines < self.code_len:
@@ -64,7 +60,7 @@ class parser_composition:
 
         return _name.strip()
 
-    #scan constructs that have identificator such as 
+    #scan constructs that have identificator such as
     #controls, actions and tables definitions
     def scan_def(self, dic_):
         it_symbols = 0
@@ -78,7 +74,6 @@ class parser_composition:
                 else:
                     return False
             self.it_lines = self.it_lines + 1
-
 
     def scan_control_block(self, block_name):
         colchetes = 0
@@ -98,7 +93,6 @@ class parser_composition:
                         name = self.parse_name()
                         block = self.parse_codeBlock()
                         self.tables_.append({name : block})
-
             elif(self.src_code[self.it_lines] == 'a'):
                 if(self.src_code[self.it_lines+1] == 'c'):
                     if(self.scan_def("action*")):
@@ -119,13 +113,35 @@ class parser_composition:
                     params = self.parse_params()
                     block = self.scan_control_block(name)
             self.it_lines = self.it_lines + 1
-
     '''
+    #parse selects from states
+    def select_attribute():
+
+    #parse transitions of states
+    def read_transition():
+
+        #transition := select(atribute) | accept | reject
+
+
+    def parse_stateBlock():
+        #packet extract (hdr)
+        #transition
+        #read_transition()
+
+
+        #FUTURE TODO HEHEHE
+        #there is a need to read lookahead too
+    '''
+
+    def scan_parse_control(self):
+        if(self.scan_def("state*")):
+            name = self.parse_name()
+            self.parse_stateBlock()
+
+
     def scan_parser(self):
         while self.it_lines < self.code_len:
-        if(self.scan_def("parser*")){
-
-        }
-
-    def scan_
-    '''
+            if(self.scan_def("parser*")):
+                name = self.parse_name()
+                params = self.parse_params()
+                self.scan_parse_control()

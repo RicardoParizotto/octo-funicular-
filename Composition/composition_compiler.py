@@ -1,7 +1,6 @@
 import sys
 from p4module import load_p4module
 
-
 class process_commandline:
 
     modules_ = []
@@ -19,8 +18,7 @@ class process_commandline:
         l.sequential_composition(x.load)
 
         '''
-        TODO 
-        
+        TODO
         interpret commands
 
         read P4 files
@@ -46,4 +44,3 @@ if __name__ == "__main__":
     #compose
     p = process_commandline()
     p.parser_command_line(sys.argv[1], sys.argv[2])
-
