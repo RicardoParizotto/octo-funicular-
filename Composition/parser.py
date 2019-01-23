@@ -138,7 +138,6 @@ class parser_composition:
             name = self.parse_name()
             self.parse_stateBlock()
 
-
     def scan_parser(self):
         while self.it_lines < self.code_len:
             if(self.scan_def("parser*")):
