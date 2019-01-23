@@ -89,7 +89,7 @@ class load_p4module:
 
             if(meta.context_control == 1){
         """ + """ if(meta.extension_id1 == 1){ """ + """
-        """ + str(extension.apply_) + """
+        """ + ''.join(map(str, extension.apply_['MyIngress'])) + """
             }
         """
 

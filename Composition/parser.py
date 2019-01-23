@@ -2,7 +2,8 @@ class parser_composition:
 
     tables_= []
     actions_ = []
-    apply_ = []
+
+    apply_ = {}
 
     #init structures to help the scanning process
     def __init__(self, src_p4):
@@ -79,7 +80,7 @@ class parser_composition:
             self.it_lines = self.it_lines + 1
 
 
-    def scan_control_block(self):
+    def scan_control_block(self, block_name):
         colchetes = 0
 
         while self.it_lines < self.code_len:
@@ -88,7 +89,7 @@ class parser_composition:
             elif(self.src_code[self.it_lines] == '}'):
                self.it_lines = self.it_lines + 1
                if(colchetes == 1):
-                   return
+                   return #magic
                else:
                    colchetes = colchetes - 1
             elif(self.src_code[self.it_lines] == 't'):
@@ -105,11 +106,9 @@ class parser_composition:
                             params = self.parse_params()
                             block = self.parse_codeBlock()
                             self.actions_.append({name : block})
-                    elif(self.scan_def("apply*")):
-                        self.apply_.append(self.parse_codeBlock())
-
+                elif(self.scan_def("apply*")):
+                    self.apply_[block_name] = self.parse_codeBlock()
             self.it_lines = self.it_lines + 1
-
 
     def scan_control(self):
         while self.it_lines < self.code_len:
@@ -117,5 +116,5 @@ class parser_composition:
                 if(self.scan_def("control*")):
                     name = self.parse_name()
                     params = self.parse_params()
-                    block = self.scan_control_block()
+                    block = self.scan_control_block(name)
             self.it_lines = self.it_lines + 1
