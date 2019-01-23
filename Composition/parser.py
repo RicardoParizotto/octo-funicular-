@@ -110,6 +110,7 @@ class parser_composition:
                     self.apply_[block_name] = self.parse_codeBlock()
             self.it_lines = self.it_lines + 1
 
+    #scan the construct inside a control
     def scan_control(self):
         while self.it_lines < self.code_len:
             if(self.src_code[self.it_lines] == 'c'):
@@ -118,3 +119,13 @@ class parser_composition:
                     params = self.parse_params()
                     block = self.scan_control_block(name)
             self.it_lines = self.it_lines + 1
+
+    '''
+    def scan_parser(self):
+        while self.it_lines < self.code_len:
+        if(self.scan_def("parser*")){
+
+        }
+
+    def scan_
+    '''
