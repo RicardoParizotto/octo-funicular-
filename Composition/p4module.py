@@ -13,7 +13,7 @@ class load_p4module:
         self.load = parser_composition(host)
         self.load.scan_control()
 
-
+    #just calculates de union of table definitions
     def table_union(self, extension):
         self.tables_ = self.tables_ + extension.tables_
 
@@ -59,8 +59,6 @@ class load_p4module:
         tables = self.load.tables_  + extension.tables_
         actions = self.load.actions_ + extension.actions_ 
 
- 
-        print(extension.apply_)
 
         catalogue = """    action set_chaining(egressSpec_t prog){
          meta.context_control = 1;      

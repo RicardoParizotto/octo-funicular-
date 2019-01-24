@@ -2,7 +2,6 @@ class parser_composition:
 
     tables_= []        #list of tables. I think that a dict would be efficiently
     actions_ = []      #list of actions. Same for dict...
-
     apply_ = {}        #a dic of every apply found on each control. The control id is the dic index
 
     #init structures to help the scanning process
@@ -52,8 +51,9 @@ class parser_composition:
     def parse_name(self):
         _name = ""
         while self.it_lines < self.code_len:
-            if(self.src_code[self.it_lines] != '{' and self.src_code[self.it_lines] != '('):
-                _name = _name + self.src_code[self.it_lines]
+            it = self.src_code[self.it_lines]
+            if(it != '{' and it != '(' and it != ';'):
+                _name = _name + it
             else:
                 break
             self.it_lines = self.it_lines + 1
@@ -104,7 +104,70 @@ class parser_composition:
                     self.apply_[block_name] = self.parse_codeBlock()
             self.it_lines = self.it_lines + 1
 
-    #scan the construct inside a control
+    #parse transitions of states
+    def read_transition(self):
+        '''
+        #transition := select(atribute) | accept | reject
+        #select attribute from the select
+        #the select works as a simple switch case for transitions
+        '''
+        name = self.parse_name()
+
+        if(name == 'select'):
+            self.parse_params()
+        print('add transition ' + name )
+
+    def parse_stateBlock(self):
+        '''
+        #stateBlock := packet_extract | transition
+        #in case there is a packet extraction we need to save it
+        #the need to save it is to rewrite the code 
+        #and also to search for non-determinism
+
+        #FUTURE WORK TODO HUEHUEBRBR SCIENCE
+        #there is a need to read lookahead too
+        '''
+        colchetes = 0
+        while self.it_lines < self.code_len:
+            if(self.src_code[self.it_lines] == '{'):
+                colchetes = colchetes + 1
+            elif(self.src_code[self.it_lines] == '}'):
+               self.it_lines = self.it_lines + 1
+               if(colchetes == 1):
+                   return #magic
+               else:
+                   colchetes = colchetes - 1
+            else:
+                if(self.scan_def('packet_extract*')):
+                    params = self.parse_params()
+                    name = self.parse_name()  #read the transition reserved word
+                elif(self.scan_def('transition*')):    
+                    self.read_transition()
+            self.it_lines = self.it_lines + 1
+
+    #scan a block o parser
+    #different from blocks of control flow
+    def scan_parse_control(self):
+
+        colchetes = 0
+        while self.it_lines < self.code_len:
+
+            if(self.src_code[self.it_lines] == '{'):
+                colchetes = colchetes + 1
+            elif(self.src_code[self.it_lines] == '}'):
+               self.it_lines = self.it_lines + 1
+               if(colchetes == 1):
+                   return #magic
+               else:
+                   colchetes = colchetes - 1
+            elif(self.scan_def("state*")):
+                name = self.parse_name()
+                print(name)
+                self.parse_stateBlock()
+            self.it_lines = self.it_lines + 1
+
+
+    #scan the construct inside a control or parsers
     def scan_control(self):
         while self.it_lines < self.code_len:
             if(self.src_code[self.it_lines] == 'c'):
@@ -112,35 +175,12 @@ class parser_composition:
                     name = self.parse_name()
                     params = self.parse_params()
                     block = self.scan_control_block(name)
-            self.it_lines = self.it_lines + 1
-    '''
-    #parse selects from states
-    def select_attribute():
-
-    #parse transitions of states
-    def read_transition():
-
-        #transition := select(atribute) | accept | reject
-
-
-    def parse_stateBlock():
-        #packet extract (hdr)
-        #transition
-        #read_transition()
-
-
-        #FUTURE TODO HEHEHE
-        #there is a need to read lookahead too
-    '''
-
-    def scan_parse_control(self):
-        if(self.scan_def("state*")):
-            name = self.parse_name()
-            self.parse_stateBlock()
-
-    def scan_parser(self):
-        while self.it_lines < self.code_len:
-            if(self.scan_def("parser*")):
+            
+            elif(self.scan_def("parser*")):
                 name = self.parse_name()
                 params = self.parse_params()
+                print(name)
                 self.scan_parse_control()
+            
+            self.it_lines = self.it_lines + 1
+    
