@@ -104,6 +104,14 @@ class parser_composition:
                     self.apply_[block_name] = self.parse_codeBlock()
             self.it_lines = self.it_lines + 1
 
+    def parse_select(self):
+        '''
+        {param : state}
+
+        add transition param -> state
+        '''
+
+
     #parse transitions of states
     def read_transition(self):
         '''
@@ -115,6 +123,8 @@ class parser_composition:
 
         if(name == 'select'):
             self.parse_params()
+
+        #add transition * -> state
         print('add transition ' + name )
 
     def parse_stateBlock(self):
