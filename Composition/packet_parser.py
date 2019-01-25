@@ -9,8 +9,6 @@ class packet_parser:
         self.src_code = src_p4
         self.code_len = len(self.src_code)
 
-
-
     #just scan the name (id) of a control flow construct
     #its a naive implementation, since
     def parse_name(self):
@@ -43,15 +41,12 @@ class packet_parser:
     #this is necessary just for parsing and rewriting
     def parse_params(self):
         params_ = ""
-
         while self.src_code[self.it_lines] != ')':
             self.it_lines = self.it_lines + 1
             params_ = params_ + self.src_code[self.it_lines]
         self.it_lines = self.it_lines + 1
 
         return params_
-
-
 
     def scan_parse_control(self):
         colchetes = 0
@@ -67,6 +62,7 @@ class packet_parser:
             elif(self.scan_def("state*")):
                 name = self.parse_name()
                 self.parser_[name] = {}
+                print("READING NEW STATE" + name)
                 self.parse_stateBlock(name)
             self.it_lines = self.it_lines + 1
 
@@ -118,17 +114,17 @@ class packet_parser:
         '''
         #transition := select(atribute) | accept | reject
         #select attribute from the select
-        #the select works as a simple switch case for transitions
+        #the selection works as a simple switch case for transitions
         '''
         name = self.parse_name()
 
         if(name == 'select'):
             self.parse_params()
             self.parse_select(state)
-            print('QUANDO Q SAI ')
+            print('READING SELECT')
         else:
             self.parser_[state]['*'] = name
-            print('JESUS ONDE STOU')
+            print('READING TRANSITION WITHOUT SELECT')
             print(self.parser_[state])
             print(self.src_code[self.it_lines])
         #add transition * -> state
@@ -144,23 +140,26 @@ class packet_parser:
         #FUTURE TODO HUEHUEBRBR SCIENCE WORKS
         #there is a need to read lookahead too
         '''
-        colchetes = 0
-        while self.it_lines < self.code_len:
-            if(self.src_code[self.it_lines] == '{'):
-                colchetes = colchetes + 1
-            elif(self.src_code[self.it_lines] == '}'):
-               self.it_lines = self.it_lines + 1
-               if(colchetes == 1):
-                   return #magic
-               else:
-                   colchetes = colchetes - 1
-            else:
-                if(self.scan_def('packet_extract*')):
-                    params = self.parse_params()
-                    name = self.parse_name()  #read the transition reserved word
-                elif(self.scan_def('transition*')):
-                    self.read_transition(state_id)
-            self.it_lines = self.it_lines + 1
+
+        print('DEBUG MASTER')
+        car = self.src_code[self.it_lines]
+        while car == ' ' or car == '\n' or car == '{':
+            self.it_lines = self.it_lines+1
+            car = self.src_code[self.it_lines]
+
+        print('DEBUG MASTER 2')
+        print(self.src_code[self.it_lines])
+        if(self.src_code[self.it_lines] == 'p'):
+            if(self.scan_def('packet.extract*')):    #<----BUG MASTER FOUNDED BB
+                print('packet extract')
+                params = self.parse_params()
+                name = self.parse_name()  #read the transition reserved word
+        elif(self.scan_def('transition*')):
+            self.read_transition(state_id)
+            print("READING TRANSITION")
+            #self.it_lines = self.it_lines + 1
+
+        self.parse_till_symbol('}')
 
 
     def scan_control(self):
