@@ -15,7 +15,10 @@ class process_commandline:
 
         x = load_p4module(self.read_file(Extension))
 
-        l.sequential_composition(x.load)
+
+        print(x.parser.parser_)
+
+        #l.sequential_composition(x.load)
 
         '''
         TODO

@@ -1,5 +1,6 @@
 
-from parser import parser_composition
+from parser import parser_control_flow
+from packet_parser import packet_parser
 
 class load_p4module:
     #there is a need to include registers
@@ -10,8 +11,12 @@ class load_p4module:
 
 
     def __init__(self, host):
-        self.load = parser_composition(host)
+        self.load = parser_control_flow(host)
         self.load.scan_control()
+
+        self.parser = packet_parser(host)
+        self.parser.scan_control()
+
 
     #just calculates de union of table definitions
     def table_union(self, extension):
@@ -30,15 +35,15 @@ class load_p4module:
                 for action in item: #action name
                     f.write("%s" % "action " + action)
                     for j in item[action]:
-                        f.write("%s" % j)         
+                        f.write("%s" % j)
             for item in tables:
                 for table in item:   #table name
                     f.write("%s" % "table " + table)
                     for j in item[table]:
-                        f.write("%s" % j)  
+                        f.write("%s" % j)
 
 
-    #this actually builds the new program    
+    #this actually builds the new program
     def parallel_composition(self):
         self.parser.scan_control_block()
 
@@ -46,22 +51,15 @@ class load_p4module:
         print("tables" + str(self.parser.tables_))
         print ("apply content" + str(self.parser.apply_block))
 
-        with open('composition.txt', 'w') as f:
-            for item in self.parser.tables_:
-                for table in item:
-                    f.write("%s" % "table " + table)
-                    for j in item[table]:
-                        f.write("%s" % j)
-
 
     def sequential_composition(self, extension):
         #merge tables (this is the naive way)
         tables = self.load.tables_  + extension.tables_
-        actions = self.load.actions_ + extension.actions_ 
+        actions = self.load.actions_ + extension.actions_
 
 
         catalogue = """    action set_chaining(egressSpec_t prog){
-         meta.context_control = 1;      
+         meta.context_control = 1;
          meta.extension_id1 = prog;
         } """
 
@@ -72,14 +70,16 @@ class load_p4module:
            }
            actions = {
                set_chaining;
-               NoAction;  
+               NoAction;
            }
            size = 1024;
            default_action = NoAction();
         }"""
 
-
         #if sequential composition the extension id is always 1. extension
+
+        ##print(extension.apply_)
+        #print(extension.parser_['start'])
 
         applys = """
         apply {
@@ -96,4 +96,3 @@ class load_p4module:
         print(catalogue)
         print(shadow)
         print(applys)
-
