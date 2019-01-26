@@ -27,6 +27,10 @@ class packet_parser:
     def scan_def(self, dic_):
         it_symbols = 0
 
+        #ignore whitespaces --
+        while self.src_code[self.it_lines] == ' ' or self.src_code[self.it_lines] == '\n':
+            self.it_lines = self.it_lines + 1
+
         while self.it_lines < self.code_len:
             if dic_[it_symbols] == '*':
                 return True
@@ -82,7 +86,6 @@ class packet_parser:
     def parse_select(self, state):
         '''
         {param : state}
-
         add transition param -> state
         '''
         colchetes = 1
@@ -104,8 +107,7 @@ class packet_parser:
                 self.it_lines = self.it_lines + 1
                 next_state = self.parse_till_symbol(';')
                 self.it_lines = self.it_lines + 1
-                print("RATINHO" + param + next_state + "URUBU REI")
-                print('o que tem aqui gente meu deus' + str(colchetes))
+                print("Param: " + param + "Next_state: " + next_state) #ifdebug
                 self.parser_[state][param] = next_state
             self.it_lines = self.it_lines + 1
 
@@ -119,9 +121,10 @@ class packet_parser:
         name = self.parse_name()
 
         if(name == 'select'):
+            print('READING SELECT')
             self.parse_params()
             self.parse_select(state)
-            print('READING SELECT')
+
         else:
             self.parser_[state]['*'] = name
             print('READING TRANSITION WITHOUT SELECT')
@@ -141,20 +144,20 @@ class packet_parser:
         #there is a need to read lookahead too
         '''
 
-        print('DEBUG MASTER')
         car = self.src_code[self.it_lines]
         while car == ' ' or car == '\n' or car == '{':
             self.it_lines = self.it_lines+1
             car = self.src_code[self.it_lines]
 
-        print('DEBUG MASTER 2')
         print(self.src_code[self.it_lines])
         if(self.src_code[self.it_lines] == 'p'):
             if(self.scan_def('packet.extract*')):    #<----BUG MASTER FOUNDED BB
                 print('packet extract')
                 params = self.parse_params()
-                name = self.parse_name()  #read the transition reserved word
-        elif(self.scan_def('transition*')):
+                print(params)
+                self.parse_till_symbol(';')
+                self.it_lines = self.it_lines + 1
+        if(self.scan_def('transition*')):
             self.read_transition(state_id)
             print("READING TRANSITION")
             #self.it_lines = self.it_lines + 1
