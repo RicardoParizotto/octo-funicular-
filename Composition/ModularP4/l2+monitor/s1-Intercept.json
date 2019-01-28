@@ -1,0 +1,49 @@
+{
+  "target": "bmv2",
+  "p4info": "build/basic.p4info",
+  "bmv2_json": "build/basic.json",
+  "table_entries": [
+    {
+      "table": "MyIngress.eth_exact",
+      "default_action": true,
+      "action_name": "NoAction",
+      "action_params": { }
+    },
+    {
+      "table": "MyIngress.eth_exact",
+      "match": {
+        "hdr.ethernet.srcAddr": ["00:00:00:00:01:01"]
+      },
+      "action_name": "MyIngress.simple_forward",
+      "action_params": {
+        "port": 2
+      }
+    },
+    {
+      "table": "MyIngress.eth_exact",
+      "match": {
+        "hdr.ethernet.srcAddr": ["00:00:00:00:01:02"]
+      },
+      "action_name": "MyIngress.simple_forward",
+      "action_params": {
+        "port": 1
+      }
+    },
+    {
+      "table": "MyIngress.shadow",
+      "default_action": true,
+      "action_name": "NoAction",
+      "action_params": { }
+    },
+    {
+      "table": "MyIngress.shadow",
+      "match": {
+        "hdr.ethernet.dstAddr": ["00:00:00:00:01:02"]
+      },
+      "action_name": "MyIngress.set_chaining",
+      "action_params": {
+        "prog": 1
+      }
+    }
+  ]
+}

@@ -10,7 +10,7 @@ class process_commandline:
         f = open(file, 'r')
         return f.read()
 
-    def parser_command_line(self, Host, Extension):
+    def parallel_composition(self, Host, Extension):
         '''
         TODO
         interpret commands
@@ -24,7 +24,14 @@ class process_commandline:
         print(x.parser.parser_)
 
         x.write_parser_extension(x)
+
+
         #l.sequential_composition(x.load)
+
+        return 'file_name'
+
+    def sequential_composition(self, Host, Extension)
+        return 'file_name'
 
 if __name__ == "__main__":
     """
@@ -37,4 +44,4 @@ if __name__ == "__main__":
     """
 
     p = process_commandline()
-    p.parser_command_line(sys.argv[1], sys.argv[2])
+    p.parallel_composition(sys.argv[1], sys.argv[2])
