@@ -18,7 +18,6 @@ class process_commandline:
         push modules and operators into queue
         process the composition
         '''
-        
         l = load_p4module(self.read_file(Host))
         x = load_p4module(self.read_file(Extension))
         print(x.parser.parser_)
@@ -30,7 +29,7 @@ class process_commandline:
 
         return 'file_name'
 
-    def sequential_composition(self, Host, Extension)
+    def sequential_composition(self, Host, Extension):
         return 'file_name'
 
 if __name__ == "__main__":
