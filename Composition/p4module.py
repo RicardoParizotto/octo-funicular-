@@ -104,11 +104,12 @@ class load_p4module:
             parser """ + self.parser.parser_name + self.parser.parser_param +""" {"""
 
         for item in self.parser.parser_:
-            parser_def = parser_def + """ state """ + item + """ {
-                    packet_extract(attr);
-                    transition
-                }"""
-
+            parser_def = parser_def + """ state """ + item + """ { \n"""
+            for transition in self.parser.parser_[item]:
+                #packet_extract(attr);
+                parser_def = parser_def + """
+                """ + str(self.parser.parser_[item]) + """;"""
+            parser_def = parser_def + """}"""
         parser_def = parser_def + "}"
 
         print(parser_def)
