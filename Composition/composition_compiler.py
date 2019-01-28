@@ -11,39 +11,30 @@ class process_commandline:
         return f.read()
 
     def parser_command_line(self, Host, Extension):
-        l = load_p4module(self.read_file(Host))
-
-        x = load_p4module(self.read_file(Extension))
-
-
-        print(x.parser.parser_)
-
-        #l.sequential_composition(x.load)
-
         '''
         TODO
         interpret commands
-
         read P4 files
-
         push modules and operators into queue
-
         process the composition
         '''
+        
+        l = load_p4module(self.read_file(Host))
+        x = load_p4module(self.read_file(Extension))
+        print(x.parser.parser_)
+
+        x.write_parser_extension(x)
+        #l.sequential_composition(x.load)
 
 if __name__ == "__main__":
-    """ss
-    TODO
-    passe file names as a param for __init__
     """
+    TODO
     #this should open the basis code json
-
     #scan the command line (sw, command)
-
     #parse commandline
-
     #open files
-
     #compose
+    """
+
     p = process_commandline()
     p.parser_command_line(sys.argv[1], sys.argv[2])

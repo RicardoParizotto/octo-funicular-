@@ -3,9 +3,7 @@ This is a more generic class
 that includes parsers of names
 reads definitions
 and parameters
-
 '''
-
 
 class lib_parser:
     #init structures to help the scanning process

@@ -1,6 +1,7 @@
 
 class packet_parser:
     parser_ = {}        #dic of states of the parser. Each state maps to a list of attributes
+    params_ = []
 
     #init structures to help the scanning process
     def __init__(self, src_p4):
@@ -8,6 +9,9 @@ class packet_parser:
         self.it_symbols = 0
         self.src_code = src_p4
         self.code_len = len(self.src_code)
+        self.parser_name = ''
+        self.parser_param = ''
+
 
     #just scan the name (id) of a control flow construct
     #its a naive implementation, since
@@ -28,7 +32,7 @@ class packet_parser:
         it_symbols = 0
 
         #ignore whitespaces --
-        while self.src_code[self.it_lines] == ' ' or self.src_code[self.it_lines] == '\n':
+        while self.it_lines < self.code_len and (self.src_code[self.it_lines] == ' ' or self.src_code[self.it_lines] == '\n'):
             self.it_lines = self.it_lines + 1
 
         while self.it_lines < self.code_len:
@@ -66,7 +70,6 @@ class packet_parser:
             elif(self.scan_def("state*")):
                 name = self.parse_name()
                 self.parser_[name] = {}
-                print("READING NEW STATE" + name)
                 self.parse_stateBlock(name)
             self.it_lines = self.it_lines + 1
 
@@ -83,6 +86,10 @@ class packet_parser:
 
         return _name.strip()
 
+    '''
+    this method scan the transtions inside a select
+    it ignores whitespaces and newlines marks
+    '''
     def parse_select(self, state):
         '''
         {param : state}
@@ -107,7 +114,6 @@ class packet_parser:
                 self.it_lines = self.it_lines + 1
                 next_state = self.parse_till_symbol(';')
                 self.it_lines = self.it_lines + 1
-                print("Param: " + param + "Next_state: " + next_state) #ifdebug
                 self.parser_[state][param] = next_state
             self.it_lines = self.it_lines + 1
 
@@ -121,16 +127,12 @@ class packet_parser:
         name = self.parse_name()
 
         if(name == 'select'):
-            print('READING SELECT')
             self.parse_params()
             self.parse_select(state)
 
-        else:
+        else: #no selects implicates one single transition
             self.parser_[state]['*'] = name
-            print('READING TRANSITION WITHOUT SELECT')
-            print(self.parser_[state])
-            print(self.src_code[self.it_lines])
-        #add transition * -> state
+        #TODO add transition * -> state
         self.parse_till_symbol('}')
 
     def parse_stateBlock(self, state_id):
@@ -139,7 +141,6 @@ class packet_parser:
         #in case there is a packet extraction we need to save it
         #the need to save it is to rewrite the code
         #and also to search for non-determinism
-
         #FUTURE TODO HUEHUEBRBR SCIENCE WORKS
         #there is a need to read lookahead too
         '''
@@ -151,17 +152,14 @@ class packet_parser:
 
         print(self.src_code[self.it_lines])
         if(self.src_code[self.it_lines] == 'p'):
-            if(self.scan_def('packet.extract*')):    #<----BUG MASTER FOUNDED BB
-                print('packet extract')
+            if(self.scan_def('packet.extract*')):
+                #need to save packet extract params to rewrite the code
                 params = self.parse_params()
                 print(params)
                 self.parse_till_symbol(';')
                 self.it_lines = self.it_lines + 1
         if(self.scan_def('transition*')):
             self.read_transition(state_id)
-            print("READING TRANSITION")
-            #self.it_lines = self.it_lines + 1
-
         self.parse_till_symbol('}')
 
 
@@ -171,7 +169,7 @@ class packet_parser:
         while self.it_lines < self.code_len:
             if(self.src_code[self.it_lines] == 'p'):
                 if(self.scan_def("parser*")):
-                    name = self.parse_name()
-                    params = self.parse_params()
+                    self.parser_name = self.parse_name()
+                    self.parser_param = self.parse_params()
                     self.scan_parse_control()
             self.it_lines = self.it_lines + 1
