@@ -12,7 +12,6 @@ class packet_parser:
         self.parser_name = ''
         self.parser_param = ''
 
-
     #just scan the name (id) of a control flow construct
     #its a naive implementation, since
     def parse_name(self):

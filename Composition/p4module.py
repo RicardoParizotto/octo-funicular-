@@ -9,7 +9,6 @@ class load_p4module:
     actions_ = []
     apply_ = []
 
-
     def __init__(self, host):
         self.load = parser_control_flow(host)
         self.load.scan_control()
@@ -90,11 +89,6 @@ class load_p4module:
         """
 
         #here there is a need to concatenate applys from the host and the extension
-        '''
-        print(catalogue)
-        print(shadow)
-        print(applys)
-        '''
 
     def write_parser_extension(self, exntesion):
         #remember that packet extracts are optinal
@@ -113,3 +107,64 @@ class load_p4module:
         parser_def = parser_def + "}"
 
         print(parser_def)
+
+
+class program_catalogue:
+    programs = []
+
+    def write_composition_gambia(self):
+        programs = []
+
+        catalogue = """    action set_chaining(egressSpec_t prog){
+         meta.context_control = 1;
+         meta.extension_id1 = prog;
+        } """
+
+
+        shadow = """table shadow{
+           key = {
+              hdr.ethernet.dstAddr: lpm;
+           }
+           actions = {
+               set_chaining;
+               NoAction;
+           }
+           size = 1024;
+           default_action = NoAction();
+        }"""
+
+        #if sequential composition the extension id is always 1. Different ids can be used to
+        #point to more modules
+
+        applys = """
+        apply {
+            shadow.apply();
+
+        applys = """
+        apply {
+            shadow.apply();
+
+            if(meta.context_control == 1){"""
+
+        for p4module in programs:
+            applys = applys + calc_sequential_apply(p4module)
+
+        applys = applys + """
+            }
+        }
+
+        """
+
+    def calc_sequential_apply(self, extension):
+        return  """if(meta.extension_""" + programs.index(p4module) + """==1) {
+                    """ + ''.join(map(str, extension.apply_['MyIngress'])) + """
+                }
+            """
+
+    def calc_parallel_apply(self, extension):
+        return """if(meta.extension_""" + programs.index(p4module) + """==1) {
+                    """ + ''.join(map(str, extension.apply_['MyIngress'])) + """
+                } else
+            """
+
+
