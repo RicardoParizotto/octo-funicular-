@@ -30,6 +30,12 @@ class process_commandline:
         return 'file_name'
 
     def sequential_composition(self, Host, Extension):
+        l = load_p4module(self.read_file(Host))
+        x = load_p4module(self.read_file(Extension))
+
+        l.sequential_composition(x)
+
+
         return 'file_name'
 
 if __name__ == "__main__":
@@ -43,4 +49,4 @@ if __name__ == "__main__":
     """
 
     p = process_commandline()
-    p.parallel_composition(sys.argv[1], sys.argv[2])
+    p.sequential_composition(sys.argv[1], sys.argv[2])

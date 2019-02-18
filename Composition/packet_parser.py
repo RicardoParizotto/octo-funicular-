@@ -48,13 +48,17 @@ class packet_parser:
     #this is necessary just for parsing and rewriting
     def parse_params(self):
         params_ = ""
-        while self.src_code[self.it_lines] != ')':
-            self.it_lines = self.it_lines + 1
+
+        while True:
             params_ = params_ + self.src_code[self.it_lines]
+            if self.src_code[self.it_lines] != ')': 
+                break     
+            self.it_lines = self.it_lines + 1
         self.it_lines = self.it_lines + 1
 
         return params_
 
+        
     def scan_parse_control(self):
         colchetes = 0
         while self.it_lines < self.code_len:
