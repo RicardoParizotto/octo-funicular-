@@ -17,10 +17,7 @@ default:accept;
 transition accept; 
 }
  state parse_ethernet { 
-transition select(hdr.ethernet.etherType){
-default:accept; 
-0x800:parse_ipv4; 
-}
+transition accept; 
 }
 }
 
@@ -57,16 +54,8 @@ action drop() {
         mark_to_drop();
     }
 
-action set_ecmp_select(bit<16> ecmp_base, bit<32> ecmp_count) {
-        /* TODO: hash on 5-tuple and save the hash result in meta.ecmp_select 
-           so that the ecmp_nhop table can use it to make a forwarding decision accordingly */
-    }
-
-action set_nhop(bit<48> nhop_dmac, bit<32> nhop_ipv4, bit<9> port) {
-        hdr.ethernet.dstAddr = nhop_dmac;
-        hdr.ipv4.dstAddr = nhop_ipv4;
+action simple_forward(egressSpec_t port){
         standard_metadata.egress_spec = port;
-        hdr.ipv4.ttl = hdr.ipv4.ttl - 1;
     }
 
 action set_chaining(egressSpec_t prog){
@@ -105,26 +94,17 @@ table send_frame{
         size = 256;
     }
 
-table ecmp_group{
+table eth_exact{
         key = {
-            hdr.ipv4.dstAddr: lpm;
+            hdr.ethernet.srcAddr:exact;
         }
-        actions = {
-            drop;
-            set_ecmp_select;
+        actions={
+             simple_forward();
+             NoAction;
+             drop;
         }
         size = 1024;
-    }
-
-table ecmp_nhop{
-        key = {
-            meta.ecmp_select: exact;
-        }
-        actions = {
-            drop;
-            set_nhop;
-        }
-        size = 2;
+        default_action = NoAction();
     }
 
 table shadow{
@@ -140,3 +120,22 @@ table shadow{
         }
 
 }
+        apply {
+            shadow.apply();
+
+            if(meta.context_control == 1){ 
+if(meta.extension_host_id==1) { 
+
+                     {
+	   eth_exact.apply();
+    }
+                }if(meta.extension_host_id==1){
+                     {
+	   eth_exact.apply();
+    }
+                }
+            
+            }
+        }
+
+        

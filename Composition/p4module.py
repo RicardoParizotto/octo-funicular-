@@ -25,7 +25,7 @@ class load_p4module:
     open and write the merged structures to a new file
     it is importante to note that the verification must come earlier
     '''
-    def assemble_new_program(self, parser, actions, tables):
+    def assemble_new_program(self, parser, actions, tables, extension):
         with open('composition.p4', 'w') as f:
 
             f.write("%s" % parser)
@@ -54,17 +54,25 @@ class load_p4module:
                     f.write("\n\n")
             f.write("%s" % "}")
 
+            #calculate a simple sequential composition. This need to be connected to the composition calc
+            #dont know how
+
+            host = program_catalogue()
+
+            host.write_composition_gambia(host.calc_sequential_apply(self.load, extension.load))
+
+            f.write("%s" % host.applys)
+
+
+
     #this actually builds the new program
     def parallel_composition(self):
-        self.parser.scan_control_block()
-
-        print ("actions" + str(self.parser.actions_))
-        print("tables" + str(self.parser.tables_))
-        print ("apply content" + str(self.parser.apply_block))
-
+        return 'TODO'
 
     def sequential_composition(self, extension):
         #merge tables (this is the naive way)
+        #the paralle composition also utilize the shadow, the catalogue and the apply. 
+        #this need to be moved from here
         tables = self.load.tables_  + extension.tables_
         actions = self.load.actions_ + extension.actions_
 
@@ -103,7 +111,7 @@ class load_p4module:
 
         parser = self.write_parser_extension(extension)
 
-        self.assemble_new_program(parser, actions, tables)
+        self.assemble_new_program(parser, actions, tables, extension)
 
         #here there is a need to concatenate applys from the host and the extension
 
@@ -140,35 +148,30 @@ class program_catalogue:
     programs = []
 
     def __init__(self):
-        applys = """
+        self.applys = """
         apply {
             shadow.apply();
 
-            if(meta.context_control == 1){"""
+            if(meta.context_control == 1){ \n"""
 
-    def write_composition_gambia(self):
+    def write_composition_gambia(self, skeleton):
         #if sequential composition the extension id is always 1. Different ids can be used to
         #point to more modules
 
-
-        for p4module in programs:
-            applys = applys + calc_sequential_apply(p4module)
-
-        applys = applys + """
+        self.applys = self.applys + skeleton +"""
             }
         }
 
         """
 
-
     def calc_sequential_apply(self, host, extension):
-        return  """if(meta.extension_""" + "host_id" + """==1) {
+        return  """if(meta.extension_""" + "host_id" + """==1) { \n
+                    """ + ''.join(map(str, host.apply_['MyIngress'])) + """
+                }if(meta.extension_""" + "host_id" + """==1){
                     """ + ''.join(map(str, extension.apply_['MyIngress'])) + """
                 }
             """
-
-
-
+ 
     def calc_parallel_apply(self, extension):
         return """if(meta.extension_""" + programs.index(p4module) + """==1) {
                     """ + ''.join(map(str, extension.apply_['MyIngress'])) + """

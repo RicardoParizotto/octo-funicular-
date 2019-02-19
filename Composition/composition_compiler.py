@@ -24,7 +24,6 @@ class process_commandline:
 
         x.write_parser_extension(x)
 
-
         #l.sequential_composition(x.load)
 
         return 'file_name'
