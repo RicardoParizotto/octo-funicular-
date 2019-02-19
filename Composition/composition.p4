@@ -1,15 +1,29 @@
 
-            parser MyParser( {
+            parser MyParser(packet_in packet,
+                out headers hdr,
+                inout metadata meta,
+                inout standard_metadata_t standard_metadata) {
 
  state start { 
-} state parse_ipv4 { 
+transition parse_ethernet; 
+}
+ state parse_ipv4 { 
+transition select(hdr.ipv4.protocol){
+default:accept; 
+6:parse_tcp; 
+}
+}
+ state parse_tcp { 
+transition accept; 
+}
+ state parse_ethernet { 
+transition select(hdr.ethernet.etherType){
+default:accept; 
+0x800:parse_ipv4; 
+}
+}
+}
 
-                    {'default': 'accept', 'hdr.ipv4.protocol) {\n            6': 'parse_tcp'};
-                    {'default': 'accept', 'hdr.ipv4.protocol) {\n            6': 'parse_tcp'};} state parse_tcp { 
-} state parse_ethernet { 
-
-                    {'default': 'accept', 'hdr.ethernet.etherType) {\n            0x800': 'parse_ipv4'};
-                    {'default': 'accept', 'hdr.ethernet.etherType) {\n            0x800': 'parse_ipv4'};}}
 
 
 control MyIngress(inout headers hdr,

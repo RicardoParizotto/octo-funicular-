@@ -21,7 +21,7 @@ class parser_control_flow:
 
         while True:
             params_ = params_ + self.src_code[self.it_lines]
-            if self.src_code[self.it_lines] != ')': 
+            if self.src_code[self.it_lines] == ')': 
                 break     
             self.it_lines = self.it_lines + 1
         self.it_lines = self.it_lines + 1

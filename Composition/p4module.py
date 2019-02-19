@@ -116,16 +116,21 @@ class load_p4module:
 
         for item in self.parser.parser_:
             parser_def = parser_def + """ state """ + item + """ { \n"""
+            #ifpacket_extract
+            print(item)
+            if(item in self.parser.selects_):
+                parser_def = parser_def + 'transition select' + str(self.parser.selects_[item] + '{\n')
+
             for transition in self.parser.parser_[item]:
                 if(transition == '*'):
-                    print('transition ' + str(self.parser.parser_[item]['*']) )
+                    parser_def = parser_def + 'transition ' + str(self.parser.parser_[item]['*']) + """; \n"""
                 else:
-                    print(str(transition) + ' ' + str(self.parser.parser_[item][transition]))
                     #packet_extract(attr);
-                    parser_def = parser_def + """
-                    """ + str(self.parser.parser_[item]) + """;"""
-            parser_def = parser_def + """}"""
-        parser_def = parser_def + "}"
+                    parser_def = parser_def + str(transition) + ':' + str(self.parser.parser_[item][transition]) + """; \n"""
+            if(item in self.parser.selects_):
+                parser_def = parser_def + """}\n"""  #close the state brackets    
+            parser_def = parser_def + """}\n"""  #close the state brackets
+        parser_def = parser_def + "}\n"  #close the parser brackets
 
         return parser_def
 
@@ -134,17 +139,17 @@ class load_p4module:
 class program_catalogue:
     programs = []
 
-    def write_composition_gambia(self):
-        programs = []
-
-        #if sequential composition the extension id is always 1. Different ids can be used to
-        #point to more modules
-
+    def __init__(self):
         applys = """
         apply {
             shadow.apply();
 
             if(meta.context_control == 1){"""
+
+    def write_composition_gambia(self):
+        #if sequential composition the extension id is always 1. Different ids can be used to
+        #point to more modules
+
 
         for p4module in programs:
             applys = applys + calc_sequential_apply(p4module)
@@ -156,8 +161,8 @@ class program_catalogue:
         """
 
 
-    def calc_sequential_apply(self, extension):
-        return  """if(meta.extension_""" + programs.index(p4module) + """==1) {
+    def calc_sequential_apply(self, host, extension):
+        return  """if(meta.extension_""" + "host_id" + """==1) {
                     """ + ''.join(map(str, extension.apply_['MyIngress'])) + """
                 }
             """

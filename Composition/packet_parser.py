@@ -2,6 +2,7 @@
 class packet_parser:
     parser_ = {}        #dic of states of the parser. Each state maps to a list of attributes
     params_ = []
+    selects_ = {}
 
     #init structures to help the scanning process
     def __init__(self, src_p4):
@@ -51,14 +52,14 @@ class packet_parser:
 
         while True:
             params_ = params_ + self.src_code[self.it_lines]
-            if self.src_code[self.it_lines] != ')': 
+            if self.src_code[self.it_lines] == ')': 
                 break     
             self.it_lines = self.it_lines + 1
         self.it_lines = self.it_lines + 1
 
         return params_
 
-        
+
     def scan_parse_control(self):
         colchetes = 0
         while self.it_lines < self.code_len:
@@ -75,7 +76,6 @@ class packet_parser:
                 self.parser_[name] = {}
                 self.parse_stateBlock(name)
             self.it_lines = self.it_lines + 1
-
 
     def parse_till_symbol(self, symbol):
         _name = ""
@@ -130,13 +130,11 @@ class packet_parser:
         name = self.parse_name()
 
         if(name == 'select'):
-            self.parse_params()
+            self.selects_[state] = self.parse_params()
             self.parse_select(state)
-
         else: #no selects implicates one single transition
             self.parser_[state]['*'] = name
-        #TODO add transition * -> state
-        self.parse_till_symbol('}')
+        #self.parse_till_symbol('}')
 
     def parse_stateBlock(self, state_id):
         '''
@@ -144,10 +142,9 @@ class packet_parser:
         #in case there is a packet extraction we need to save it
         #the need to save it is to rewrite the code
         #and also to search for non-determinism
-        #FUTURE TODO HUEHUEBRBR SCIENCE WORKS
+        #FUTURE TODO HUEHUEBRBR SCIENCE WORKS:
         #there is a need to read lookahead too
         '''
-
         car = self.src_code[self.it_lines]
         while car == ' ' or car == '\n' or car == '{':
             self.it_lines = self.it_lines+1
