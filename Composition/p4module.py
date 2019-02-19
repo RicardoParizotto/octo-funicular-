@@ -124,8 +124,10 @@ class load_p4module:
 
         for item in self.parser.parser_:
             parser_def = parser_def + """ state """ + item + """ { \n"""
-            #ifpacket_extract
-            print(item)
+
+            if(item in self.parser.extract_):
+                parser_def = parser_def + 'packet.extract' + str(self.parser.extract_[item] + ';\n')
+
             if(item in self.parser.selects_):
                 parser_def = parser_def + 'transition select' + str(self.parser.selects_[item] + '{\n')
 

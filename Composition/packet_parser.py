@@ -3,6 +3,7 @@ class packet_parser:
     parser_ = {}        #dic of states of the parser. Each state maps to a list of attributes
     params_ = []
     selects_ = {}
+    extract_ = {}
 
     #init structures to help the scanning process
     def __init__(self, src_p4):
@@ -155,7 +156,7 @@ class packet_parser:
             if(self.scan_def('packet.extract*')):
                 #need to save packet extract params to rewrite the code
                 params = self.parse_params()
-                print(params)
+                self.extract_[state_id] = params   #GENIUS
                 self.parse_till_symbol(';')
                 self.it_lines = self.it_lines + 1
         if(self.scan_def('transition*')):
