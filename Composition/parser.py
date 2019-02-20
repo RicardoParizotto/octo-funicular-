@@ -1,6 +1,5 @@
 class parser_control_flow:
 
-
     tables_= []        #list of tables. I think that a dict would be efficiently
     actions_ = []      #list of actions. Same for dict...
     apply_ = {}        #a dic of every apply found on each control. The control id is the dic index

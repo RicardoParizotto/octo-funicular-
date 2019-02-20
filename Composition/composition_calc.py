@@ -14,6 +14,8 @@ import sys
 sys.path.insert(0, "../ply-3.11/")
 
 from composition_compiler import process_commandline
+from assemble import assemble_P4
+
 
 if sys.version_info[0] >= 3:
     raw_input = input
@@ -51,9 +53,10 @@ def p_expression_binop(p):
                   | expression '>' expression'''
     print(str(p[3]))
     if p[2] == '+':
-        p[0] = cmd.parallel_composition(p[1],p[3])
-    elif p[2] == '-':
-        p[0] = cmd.sequential_composition(p[1],p[3])
+        p[0] = cmd.comp.calc_parallel_apply(p[1],p[3])
+    elif p[2] == '>':
+        p[0] = cmd.comp.calc_sequential_apply(p[1],p[3])
+        print(p[0] + 'sdfsdf')
 
 
 def p_expression_group(p):
@@ -87,3 +90,6 @@ while 1:
     if not s:
         continue
     yacc.parse(s)
+
+    assembler = assemble_P4()
+    assembler.assemble_new_program(cmd.parser_, cmd.actions_, cmd.tables_, cmd.comp.applys)
